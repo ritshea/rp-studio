@@ -162,15 +162,27 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
       if (response.success && response.data) {
         const defaultFolder = await window.api.getSetting('defaultSaveFolder')
         const baseName = selectedFile.name.substring(0, selectedFile.name.lastIndexOf('.'))
-        const outPath = `${defaultFolder}/${baseName}.pdf`
+        const suggestedPath = `${defaultFolder}/${baseName}.pdf`
+
+        const outPath = await window.api.selectSavePath({
+          title: 'Convert & Save Document As PDF',
+          defaultPath: suggestedPath,
+          filters: [{ name: 'PDF Documents', extensions: ['pdf'] }]
+        })
+
+        if (!outPath) {
+          showToast('Conversion cancelled', 'info')
+          return
+        }
 
         const saveResult = await window.api.saveFile(outPath, response.data)
         if (saveResult.success) {
-          showToast(`Converted successfully! Saved to: ${outPath}`, 'success')
+          const finalName = outPath.split(/[\\/]/).pop() || `${baseName}.pdf`
+          showToast(`Converted successfully! Saved to: ${finalName}`, 'success')
           await window.api.addHistory({
             id: Math.random().toString(36).substring(7),
             timestamp: new Date().toISOString(),
-            fileName: `${baseName}.pdf`,
+            fileName: finalName,
             filePath: outPath,
             fileSize: Math.round((response.data.length * 3) / 4),
             operation: 'Doc to PDF Conversion',

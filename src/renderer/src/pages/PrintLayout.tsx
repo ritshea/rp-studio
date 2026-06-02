@@ -317,15 +317,28 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
 
       if (response.success && response.data) {
         const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-        const outPath = `${defaultFolder}/print_layout_${Date.now()}.pdf`
+        const suggestedPath = `${defaultFolder}/print_layout_${Date.now()}.pdf`
+
+        const outPath = await window.api.selectSavePath({
+          title: 'Save Print Grid Layout As',
+          defaultPath: suggestedPath,
+          filters: [{ name: 'PDF Documents', extensions: ['pdf'] }]
+        })
+
+        if (!outPath) {
+          showToast('Save cancelled', 'info')
+          return
+        }
+
         const result = await window.api.saveFile(outPath, response.data)
         
         if (result.success) {
-          showToast(`PDF saved to: ${outPath}`, 'success')
+          const finalName = outPath.split(/[\\/]/).pop() || `print_layout_${Date.now()}.pdf`
+          showToast(`PDF saved to: ${finalName}`, 'success')
           await window.api.addHistory({
             id: Math.random().toString(36).substring(7),
             timestamp: new Date().toISOString(),
-            fileName: `print_layout_${Date.now()}.pdf`,
+            fileName: finalName,
             filePath: outPath,
             fileSize: Math.round((response.data.length * 3) / 4),
             operation: 'Custom Print Layout Grid',

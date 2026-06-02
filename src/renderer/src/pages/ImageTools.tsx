@@ -482,18 +482,30 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
 
       // Generate filename
       const baseName = fileInfo.name.substring(0, fileInfo.name.lastIndexOf('.'))
-      const outPath = `${defaultFolder}/${baseName}_edit.${exportFormat}`
+      const suggestedPath = `${defaultFolder}/${baseName}_edit.${exportFormat}`
+
+      const outPath = await window.api.selectSavePath({
+        title: 'Export & Save Image As',
+        defaultPath: suggestedPath,
+        filters: [{ name: 'Images', extensions: [exportFormat] }]
+      })
+
+      if (!outPath) {
+        showToast('Export cancelled', 'info')
+        return
+      }
 
       const result = await window.api.saveFile(outPath, exportDataUrl)
       if (result.success) {
-        showToast(`Saved successfully to ${outPath}`, 'success')
+        const finalName = outPath.split(/[\\/]/).pop() || `${baseName}_edit.${exportFormat}`
+        showToast(`Saved successfully to ${finalName}`, 'success')
         
         // Add to history
         const bytes = Math.round((exportDataUrl.length * 3) / 4)
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
           timestamp: new Date().toISOString(),
-          fileName: `${baseName}_edit.${exportFormat}`,
+          fileName: finalName,
           filePath: outPath,
           fileSize: bytes,
           operation: 'Image Tool Edit',

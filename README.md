@@ -1,6 +1,6 @@
 # 🖥️ RP Studio — Smart Printing, Documents & Image Studio
 
-[![Version](https://img.shields.io/badge/Version-1.4.1--Stable-orange.svg?style=for-the-badge)](https://virajai.com)
+[![Version](https://img.shields.io/badge/Version-1.4.2--Stable-orange.svg?style=for-the-badge)](https://virajai.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2011%20Native-blue.svg?style=for-the-badge)](https://github.com/ritesh-pandey/rp-studio)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=for-the-badge)](https://ritesh.virajai.com)
 
@@ -108,7 +108,7 @@ Build production renderer pages, perform typechecking, and package a single-clic
 ```bash
 npm run build:win
 ```
-The compiled installer `rp-studio-1.4.1-setup.exe` (~102MB) will be written to the `/dist/` folder.
+The compiled installer `rp-studio-1.4.2-setup.exe` (~102MB) will be written to the `/dist/` folder.
 
 ---
 

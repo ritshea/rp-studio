@@ -120,15 +120,27 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
       const mergedPdfBytes = await mergedPdf.save()
       const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const outPath = `${defaultFolder}/merged_${Date.now()}.pdf`
+      const suggestedPath = `${defaultFolder}/merged_${Date.now()}.pdf`
+
+      const outPath = await window.api.selectSavePath({
+        title: 'Save Merged PDF As',
+        defaultPath: suggestedPath,
+        filters: [{ name: 'PDF Documents', extensions: ['pdf'] }]
+      })
+
+      if (!outPath) {
+        showToast('Merge cancelled', 'info')
+        return
+      }
 
       const result = await window.api.saveFile(outPath, mergedPdfBytes.buffer as ArrayBuffer)
       if (result.success) {
-        showToast(`PDFs merged successfully to: ${outPath}`, 'success')
+        const finalName = outPath.split(/[\\/]/).pop() || `merged_${Date.now()}.pdf`
+        showToast(`PDFs merged successfully to: ${finalName}`, 'success')
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
           timestamp: new Date().toISOString(),
-          fileName: `merged_${Date.now()}.pdf`,
+          fileName: finalName,
           filePath: outPath,
           fileSize: mergedPdfBytes.length,
           operation: 'PDF Merge',
@@ -177,15 +189,27 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
       const splitPdfBytes = await splitPdf.save()
       const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const outPath = `${defaultFolder}/split_${start}-${end}_${splitFile.name}`
+      const suggestedPath = `${defaultFolder}/split_${start}-${end}_${splitFile.name}`
+
+      const outPath = await window.api.selectSavePath({
+        title: 'Save Split PDF As',
+        defaultPath: suggestedPath,
+        filters: [{ name: 'PDF Documents', extensions: ['pdf'] }]
+      })
+
+      if (!outPath) {
+        showToast('Split cancelled', 'info')
+        return
+      }
 
       const result = await window.api.saveFile(outPath, splitPdfBytes.buffer as ArrayBuffer)
       if (result.success) {
-        showToast(`Split successfully! Saved to: ${outPath}`, 'success')
+        const finalName = outPath.split(/[\\/]/).pop() || `split_${start}-${end}_${splitFile.name}`
+        showToast(`Split successfully! Saved to: ${finalName}`, 'success')
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
           timestamp: new Date().toISOString(),
-          fileName: `split_${start}-${end}_${splitFile.name}`,
+          fileName: finalName,
           filePath: outPath,
           fileSize: splitPdfBytes.length,
           operation: 'PDF Split',
@@ -230,15 +254,27 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
       const extractedBytes = await extractedPdf.save()
       const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const outPath = `${defaultFolder}/extracted_${extractFile.name}`
+      const suggestedPath = `${defaultFolder}/extracted_${extractFile.name}`
+
+      const outPath = await window.api.selectSavePath({
+        title: 'Save Extracted Pages PDF As',
+        defaultPath: suggestedPath,
+        filters: [{ name: 'PDF Documents', extensions: ['pdf'] }]
+      })
+
+      if (!outPath) {
+        showToast('Extraction cancelled', 'info')
+        return
+      }
 
       const result = await window.api.saveFile(outPath, extractedBytes.buffer as ArrayBuffer)
       if (result.success) {
-        showToast(`Pages extracted successfully to: ${outPath}`, 'success')
+        const finalName = outPath.split(/[\\/]/).pop() || `extracted_${extractFile.name}`
+        showToast(`Pages extracted successfully to: ${finalName}`, 'success')
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
           timestamp: new Date().toISOString(),
-          fileName: `extracted_${extractFile.name}`,
+          fileName: finalName,
           filePath: outPath,
           fileSize: extractedBytes.length,
           operation: 'PDF Extract Pages',
@@ -298,15 +334,27 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
       const pdfBytes = await pdfDoc.save()
       const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const outPath = `${defaultFolder}/images_compiled_${Date.now()}.pdf`
+      const suggestedPath = `${defaultFolder}/images_compiled_${Date.now()}.pdf`
+
+      const outPath = await window.api.selectSavePath({
+        title: 'Save Compiled PDF As',
+        defaultPath: suggestedPath,
+        filters: [{ name: 'PDF Documents', extensions: ['pdf'] }]
+      })
+
+      if (!outPath) {
+        showToast('Compilation cancelled', 'info')
+        return
+      }
 
       const result = await window.api.saveFile(outPath, pdfBytes.buffer as ArrayBuffer)
       if (result.success) {
-        showToast(`PDF created successfully at: ${outPath}`, 'success')
+        const finalName = outPath.split(/[\\/]/).pop() || `images_compiled_${Date.now()}.pdf`
+        showToast(`PDF created successfully at: ${finalName}`, 'success')
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
           timestamp: new Date().toISOString(),
-          fileName: `images_compiled_${Date.now()}.pdf`,
+          fileName: finalName,
           filePath: outPath,
           fileSize: pdfBytes.length,
           operation: 'Images to PDF',
@@ -340,15 +388,27 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       const pdfBytes = await pdfDoc.save()
       const defaultFolder = await window.api.getSetting('defaultSaveFolder')
       const prefix = secAction === 'encrypt' ? 'protected_' : 'unlocked_'
-      const outPath = `${defaultFolder}/${prefix}${secFile.name}`
+      const suggestedPath = `${defaultFolder}/${prefix}${secFile.name}`
+
+      const outPath = await window.api.selectSavePath({
+        title: `${secAction === 'encrypt' ? 'Encrypt' : 'Decrypt'} & Save PDF As`,
+        defaultPath: suggestedPath,
+        filters: [{ name: 'PDF Documents', extensions: ['pdf'] }]
+      })
+
+      if (!outPath) {
+        showToast('Operation cancelled', 'info')
+        return
+      }
 
       const result = await window.api.saveFile(outPath, pdfBytes.buffer as ArrayBuffer)
       if (result.success) {
-        showToast(`Security applied successfully: ${outPath}`, 'success')
+        const finalName = outPath.split(/[\\/]/).pop() || `${prefix}${secFile.name}`
+        showToast(`Security applied successfully: ${finalName}`, 'success')
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
           timestamp: new Date().toISOString(),
-          fileName: `${prefix}${secFile.name}`,
+          fileName: finalName,
           filePath: outPath,
           fileSize: pdfBytes.length,
           operation: `PDF ${secAction === 'encrypt' ? 'Encrypt' : 'Decrypt'}`,

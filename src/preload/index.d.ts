@@ -4,6 +4,7 @@ export interface RPStudioAPI {
   getPrinters: () => Promise<any[]>
   selectDirectory: () => Promise<string | null>
   selectFile: (options?: { title?: string; filters?: { name: string; extensions: string[] }[]; properties?: string[] }) => Promise<{ filePath: string; name: string; size: number; base64Data?: string }[] | null>
+  selectSavePath: (options?: { title?: string; defaultPath?: string; filters?: { name: string; extensions: string[] }[] }) => Promise<string | null>
   saveFile: (filePath: string, buffer: ArrayBuffer | string) => Promise<{ success: boolean; error?: string; filePath?: string }>
   openPath: (path: string) => Promise<void>
   

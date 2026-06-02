@@ -15,12 +15,15 @@ compression: maximum
 win:
   executableName: rp-studio
 nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: true
+  allowElevation: true
+  uninstallDisplayName: ${productName}
+  deleteAppDataOnUninstall: true
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
   createDesktopShortcut: always
-  compression: lzma
-  solid: true
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:

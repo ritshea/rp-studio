@@ -6,6 +6,7 @@ const api = {
   getPrinters: () => ipcRenderer.invoke('get-printers'),
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   selectFile: (options: any) => ipcRenderer.invoke('select-file', options),
+  selectSavePath: (options: any) => ipcRenderer.invoke('select-save-path', options),
   saveFile: (filePath: string, buffer: ArrayBuffer | string) => ipcRenderer.invoke('save-file', filePath, buffer),
   openPath: (path: string) => ipcRenderer.invoke('open-path', path),
   

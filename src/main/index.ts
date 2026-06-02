@@ -128,6 +128,20 @@ app.whenReady().then(() => {
     return null
   })
 
+  // Open file save dialog
+  ipcMain.handle('select-save-path', async (_, options = {}) => {
+    if (!mainWindow) return null
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: options.title || 'Save File',
+      defaultPath: options.defaultPath || '',
+      filters: options.filters || []
+    })
+    if (!result.canceled && result.filePath) {
+      return result.filePath
+    }
+    return null
+  })
+
   // Save base64 or buffer data to local file system
   ipcMain.handle('save-file', async (_, filePath, data) => {
     try {
@@ -145,7 +159,12 @@ app.whenReady().then(() => {
             fs.writeFileSync(filePath, data, 'utf-8')
           }
         } else {
-          fs.writeFileSync(filePath, data, 'utf-8')
+          const isBase64 = /^[a-zA-Z0-9+/=\r\n]+$/.test(data.trim())
+          if (isBase64 && filePath.toLowerCase().endsWith('.pdf')) {
+            fs.writeFileSync(filePath, Buffer.from(data, 'base64'))
+          } else {
+            fs.writeFileSync(filePath, data, 'utf-8')
+          }
         }
       } else {
         fs.writeFileSync(filePath, Buffer.from(data))

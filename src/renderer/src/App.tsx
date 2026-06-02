@@ -116,7 +116,7 @@ function App(): React.JSX.Element {
             <h1 className="brand-name">RP Studio</h1>
           </div>
           <div className="brand-tagline">Smart Printing, Documents & Image Studio</div>
-          <div className="brand-version">v1.4.1 Stable</div>
+          <div className="brand-version">v1.4.2 Stable</div>
         </div>
 
         <nav className="sidebar-menu">

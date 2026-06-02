@@ -204,16 +204,29 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
     if (!compiledSheet) return
     try {
       const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const outPath = `${defaultFolder}/passport_sheet_${Date.now()}.jpg`
+      const suggestedPath = `${defaultFolder}/passport_sheet_${Date.now()}.jpg`
+
+      const outPath = await window.api.selectSavePath({
+        title: 'Save Passport Photo A4 Sheet As',
+        defaultPath: suggestedPath,
+        filters: [{ name: 'JPEG Images', extensions: ['jpg', 'jpeg'] }]
+      })
+
+      if (!outPath) {
+        showToast('Save cancelled', 'info')
+        return
+      }
+
       const result = await window.api.saveFile(outPath, compiledSheet)
       if (result.success) {
-        showToast(`Compiled A4 sheet saved to ${outPath}`, 'success')
+        const finalName = outPath.split(/[\\/]/).pop() || `passport_sheet_${Date.now()}.jpg`
+        showToast(`Compiled A4 sheet saved to ${finalName}`, 'success')
         
         // Add to history
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
           timestamp: new Date().toISOString(),
-          fileName: `passport_sheet_${Date.now()}.jpg`,
+          fileName: finalName,
           filePath: outPath,
           fileSize: Math.round((compiledSheet.length * 3) / 4),
           operation: 'Passport Photo Grid Layout',
