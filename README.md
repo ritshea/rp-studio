@@ -1,7 +1,7 @@
 # 🖥️ RP Studio — Smart Printing, Documents & Image Studio
 
 [![Version](https://img.shields.io/badge/Version-1.4.3--Stable-orange.svg?style=for-the-badge)](https://virajai.com)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2011%20Native-blue.svg?style=for-the-badge)](https://github.com/ritesh-pandey/rp-studio)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2011%20Native-blue.svg?style=for-the-badge)](https://github.com/ritshea/rp-studio)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=for-the-badge)](https://ritesh.virajai.com)
 
 **RP Studio** is a premium, offline-first SaaS-style desktop utility suite for Windows 11. Designed by **RP Creation**, it integrates professional tools for document management, image optimization, smart passport photo printing, custom A4 grid layouts, offline document readers, PDF editors, and bulk file converters into a single, high-performance, and lightweight interface.
