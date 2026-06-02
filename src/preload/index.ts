@@ -7,9 +7,10 @@ const api = {
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   selectFile: (options: any) => ipcRenderer.invoke('select-file', options),
   selectSavePath: (options: any) => ipcRenderer.invoke('select-save-path', options),
-  saveFile: (filePath: string, buffer: ArrayBuffer | string) => ipcRenderer.invoke('save-file', filePath, buffer),
+  saveFile: (filePath: string, buffer: ArrayBuffer | string) =>
+    ipcRenderer.invoke('save-file', filePath, buffer),
   openPath: (path: string) => ipcRenderer.invoke('open-path', path),
-  
+
   // Database API
   getSetting: (key: string) => ipcRenderer.invoke('db-get-setting', key),
   setSetting: (key: string, value: any) => ipcRenderer.invoke('db-set-setting', key, value),
@@ -21,8 +22,10 @@ const api = {
   clearHistory: () => ipcRenderer.invoke('db-clear-history'),
 
   // Document & PDF printing tools
-  printToPDF: (htmlContent: string, options?: any) => ipcRenderer.invoke('print-to-pdf', htmlContent, options),
-  printDirect: (htmlContent: string, options?: any) => ipcRenderer.invoke('print-direct', htmlContent, options)
+  printToPDF: (htmlContent: string, options?: any) =>
+    ipcRenderer.invoke('print-to-pdf', htmlContent, options),
+  printDirect: (htmlContent: string, options?: any) =>
+    ipcRenderer.invoke('print-direct', htmlContent, options)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
@@ -41,4 +44,3 @@ if (process.contextIsolated) {
   // @ts-ignore (define in dts)
   window.api = api
 }
-

@@ -1,6 +1,6 @@
 {
   "name": "rp-studio",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "RP Studio - Smart Printing, Documents & Image Studio",
   "main": "./out/main/index.js",
   "author": "Ritesh Pandey (https://ritesh.virajai.com)",

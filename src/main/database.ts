@@ -70,7 +70,7 @@ export function initDatabase(): void {
   } catch (error) {
     console.warn('better-sqlite3 failed to load. Falling back to JSON-based database.', error)
     isSqlite = false
-    
+
     // Load JSON database
     if (existsSync(jsonDbPath)) {
       try {
@@ -131,7 +131,9 @@ export function setSetting(key: string, value: any): void {
   const valueStr = JSON.stringify(value)
   if (isSqlite && dbInstance) {
     try {
-      dbInstance.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, valueStr)
+      dbInstance
+        .prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)')
+        .run(key, valueStr)
     } catch (err) {
       console.error('SQLite setSetting error', err)
     }
@@ -158,16 +160,30 @@ export function getPresets(): any[] {
 export function savePreset(preset: any): void {
   if (isSqlite && dbInstance) {
     try {
-      dbInstance.prepare(`
+      dbInstance
+        .prepare(
+          `
         INSERT OR REPLACE INTO presets (
           id, name, paperSize, width, height, topMargin, leftMargin,
           rows, columns, rowGap, columnGap, showGrid, showCutMarks
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        preset.id, preset.name, preset.paperSize, preset.width, preset.height,
-        preset.topMargin, preset.leftMargin, preset.rows, preset.columns,
-        preset.rowGap, preset.columnGap, preset.showGrid ? 1 : 0, preset.showCutMarks ? 1 : 0
-      )
+      `
+        )
+        .run(
+          preset.id,
+          preset.name,
+          preset.paperSize,
+          preset.width,
+          preset.height,
+          preset.topMargin,
+          preset.leftMargin,
+          preset.rows,
+          preset.columns,
+          preset.rowGap,
+          preset.columnGap,
+          preset.showGrid ? 1 : 0,
+          preset.showCutMarks ? 1 : 0
+        )
     } catch (err) {
       console.error('SQLite savePreset error', err)
     }
@@ -212,13 +228,22 @@ export function getHistory(): any[] {
 export function addHistory(record: any): void {
   if (isSqlite && dbInstance) {
     try {
-      dbInstance.prepare(`
+      dbInstance
+        .prepare(
+          `
         INSERT INTO history (id, timestamp, fileName, filePath, fileSize, operation, status)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        record.id, record.timestamp, record.fileName, record.filePath,
-        record.fileSize, record.operation, record.status
-      )
+      `
+        )
+        .run(
+          record.id,
+          record.timestamp,
+          record.fileName,
+          record.filePath,
+          record.fileSize,
+          record.operation,
+          record.status
+        )
     } catch (err) {
       console.error('SQLite addHistory error', err)
     }

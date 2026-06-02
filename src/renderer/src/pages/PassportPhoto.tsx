@@ -1,12 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { Card } from '../components/Card'
-import {
-  Upload,
-  Printer,
-  Download,
-  Trash2,
-  RefreshCw
-} from 'lucide-react'
+import { Upload, Printer, Download, Trash2, RefreshCw } from 'lucide-react'
 
 interface PassportPhotoProps {
   showToast: (msg: string, type: 'success' | 'error' | 'warning' | 'info') => void
@@ -31,7 +25,7 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('india')
   const [customW, setCustomW] = useState<number>(35)
   const [customH, setCustomH] = useState<number>(45)
-  
+
   // Image states
   const [imageSrc, setImageSrc] = useState<string | null>(null)
   const [zoom, setZoom] = useState<number>(100)
@@ -46,7 +40,7 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
   // Dragging state
   const isDragging = useRef<boolean>(false)
   const dragStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
-  
+
   // Compiler State
   const [compiledSheet, setCompiledSheet] = useState<string | null>(null) // base64 of generated sheet
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -118,7 +112,7 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
       // A4 = 210mm x 297mm
       // 300 DPI = 11.81 pixels/mm
       const dpiScale = 11.81
-      canvas.width = Math.round(210 * dpiScale)  // 2480 px
+      canvas.width = Math.round(210 * dpiScale) // 2480 px
       canvas.height = Math.round(297 * dpiScale) // 3508 px
 
       // Clear Canvas
@@ -146,10 +140,10 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
         const zoomScale = zoom / 100
         const dw = img.naturalWidth * zoomScale
         const dh = img.naturalHeight * zoomScale
-        
+
         // Translate center of cropping box to align correctly
-        const dx = (pWidth / 2) + (posX * dpiScale / 5) - (dw / 2)
-        const dy = (pHeight / 2) + (posY * dpiScale / 5) - (dh / 2)
+        const dx = pWidth / 2 + (posX * dpiScale) / 5 - dw / 2
+        const dy = pHeight / 2 + (posY * dpiScale) / 5 - dh / 2
 
         passCtx.drawImage(img, dx, dy, dw, dh)
 
@@ -157,7 +151,7 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
         if (borderWidth > 0) {
           passCtx.filter = 'none' // Reset filter for border
           passCtx.strokeStyle = borderColor
-          passCtx.lineWidth = borderWidth * dpiScale / 2
+          passCtx.lineWidth = (borderWidth * dpiScale) / 2
           passCtx.strokeRect(0, 0, pWidth, pHeight)
         }
       }
@@ -175,7 +169,7 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
         for (let c = 0; c < columns; c++) {
           const x = leftMargin + c * (pWidth + colGap)
           const y = topMargin + r * (pHeight + rowGap)
-          
+
           // Draw passport cell
           ctx.drawImage(passCanvas, x, y, pWidth, pHeight)
 
@@ -203,8 +197,10 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
   const savePrintSheet = async (): Promise<void> => {
     if (!compiledSheet) return
     try {
-      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const suggestedPath = `${defaultFolder}/passport_sheet_${Date.now()}.jpg`
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
+      const suggestedPath = defaultFolder
+        ? `${defaultFolder}/passport_sheet_${Date.now()}.jpg`
+        : `passport_sheet_${Date.now()}.jpg`
 
       const outPath = await window.api.selectSavePath({
         title: 'Save Passport Photo A4 Sheet As',
@@ -221,7 +217,7 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
       if (result.success) {
         const finalName = outPath.split(/[\\/]/).pop() || `passport_sheet_${Date.now()}.jpg`
         showToast(`Compiled A4 sheet saved to ${finalName}`, 'success')
-        
+
         // Add to history
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
@@ -288,7 +284,15 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
           />
         </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px', height: '100%', alignItems: 'stretch' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 320px',
+            gap: '20px',
+            height: '100%',
+            alignItems: 'stretch'
+          }}
+        >
           {/* Main workspace Canvas */}
           <div
             className="studio-card"
@@ -366,7 +370,9 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
           </div>
 
           {/* Settings / Compilation Pane */}
-          <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}>
+          <Card
+            style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto' }}
+          >
             <h3 style={{ fontFamily: 'Outfit, sans-serif' }}>Controls</h3>
 
             {/* Template preset selection */}
@@ -487,20 +493,34 @@ export const PassportPhoto: React.FC<PassportPhotoProps> = ({ showToast }) => {
               </div>
             </div>
 
-            <button className="btn btn-primary" onClick={compilePrintSheet} style={{ width: '100%', marginTop: '8px' }}>
+            <button
+              className="btn btn-primary"
+              onClick={compilePrintSheet}
+              style={{ width: '100%', marginTop: '8px' }}
+            >
               <RefreshCw size={14} />
               Generate A4 Sheet Grid
             </button>
 
             {compiledSheet && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+              <div
+                style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}
+              >
                 <h4 style={{ fontSize: '12px' }}>A4 Layout Ready</h4>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn btn-secondary" style={{ flex: 1 }} onClick={savePrintSheet}>
+                  <button
+                    className="btn btn-secondary"
+                    style={{ flex: 1 }}
+                    onClick={savePrintSheet}
+                  >
                     <Download size={14} />
                     Save File
                   </button>
-                  <button className="btn btn-secondary btn-primary" style={{ flex: 1 }} onClick={printPrintSheet}>
+                  <button
+                    className="btn btn-secondary btn-primary"
+                    style={{ flex: 1 }}
+                    onClick={printPrintSheet}
+                  >
                     <Printer size={14} />
                     Print
                   </button>

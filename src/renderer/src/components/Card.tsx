@@ -7,7 +7,13 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   onClick?: () => void
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', hoverable = false, onClick, ...rest }) => {
+export const Card: React.FC<CardProps> = ({
+  children,
+  className = '',
+  hoverable = false,
+  onClick,
+  ...rest
+}) => {
   return (
     <div
       className={`studio-card ${hoverable ? 'hoverable' : ''} ${className}`}

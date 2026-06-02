@@ -1,13 +1,6 @@
 import React, { useState } from 'react'
 import { Card } from '../components/Card'
-import {
-  Upload,
-  Minimize2,
-  Download,
-  Trash2,
-  FileText,
-  FileImage
-} from 'lucide-react'
+import { Upload, Minimize2, Download, Trash2, FileText, FileImage } from 'lucide-react'
 import { PDFDocument } from 'pdf-lib'
 
 interface CompressionToolsProps {
@@ -17,11 +10,11 @@ interface CompressionToolsProps {
 export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast }) => {
   const [selectedFile, setSelectedFile] = useState<any | null>(null)
   const [fileType, setFileType] = useState<'image' | 'pdf' | null>(null)
-  
+
   // Settings
   const [targetSizePreset, setTargetSizePreset] = useState<string>('100')
   const [customSize, setCustomSize] = useState<string>('')
-  
+
   // Results
   const [isCompressing, setIsCompressing] = useState<boolean>(false)
   const [compressionResult, setCompressionResult] = useState<{
@@ -53,7 +46,7 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
     const name = file.name.toLowerCase()
     setCompressionResult(null)
     setSelectedFile(file)
-    
+
     if (['png', 'jpg', 'jpeg', 'webp', 'bmp'].some((ext) => name.endsWith(ext))) {
       setFileType('image')
       setTargetSizePreset('100') // default 100KB for images
@@ -80,7 +73,7 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
       }
 
       ctx.drawImage(img, 0, 0)
-      
+
       let quality = 0.95
       const ext = selectedFile.name.toLowerCase().endsWith('.png') ? 'png' : 'jpeg'
       let dataUrl = canvas.toDataURL(`image/${ext}`, quality)
@@ -138,7 +131,7 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
           img.onload = async (): Promise<void> => {
             const dataUrl = await compressImage(img, targetKB)
             const bytes = Math.round((dataUrl.length * 3) / 4)
-            
+
             setCompressionResult({
               originalSize: selectedFile.size,
               compressedSize: bytes,
@@ -152,16 +145,16 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
         }
         reader.readAsDataURL(selectedFile)
       }
-      
+
       // COMPRESS PDF
       else if (fileType === 'pdf') {
         showToast('Compressing PDF stream buffers...', 'info')
         const arrayBuffer = await selectedFile.arrayBuffer()
         const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true })
-        
+
         // Save PDF with Object Stream Compression enabled
         const pdfBytes = await pdfDoc.save({ useObjectStreams: true })
-        
+
         setCompressionResult({
           originalSize: selectedFile.size,
           compressedSize: pdfBytes.length,
@@ -178,25 +171,44 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
   }
 
   const saveCompressedFile = async (): Promise<void> => {
-    if (!compressionResult) return
+    if (!compressionResult || !selectedFile) return
 
     try {
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
+      const baseName = selectedFile.name.substring(0, selectedFile.name.lastIndexOf('.'))
+      const ext = selectedFile.name.substring(selectedFile.name.lastIndexOf('.') + 1)
+      const suggestedPath = defaultFolder
+        ? `${defaultFolder}/${baseName}_compressed.${ext}`
+        : `${baseName}_compressed.${ext}`
+
+      const outPath = await window.api.selectSavePath({
+        title: 'Save Compressed File As',
+        defaultPath: suggestedPath,
+        filters: [{ name: fileType === 'image' ? 'Images' : 'PDF Documents', extensions: [ext] }]
+      })
+
+      if (!outPath) {
+        showToast('Save cancelled', 'info')
+        return
+      }
+
       let result
       if (fileType === 'image' && compressionResult.dataUrl) {
-        result = await window.api.saveFile(compressionResult.filePath, compressionResult.dataUrl)
+        result = await window.api.saveFile(outPath, compressionResult.dataUrl)
       } else if (fileType === 'pdf' && compressionResult.pdfBuffer) {
-        result = await window.api.saveFile(compressionResult.filePath, compressionResult.pdfBuffer)
+        result = await window.api.saveFile(outPath, compressionResult.pdfBuffer)
       }
 
       if (result && result.success) {
-        showToast(`Compressed file saved to: ${compressionResult.filePath}`, 'success')
-        
+        const finalName = outPath.split(/[\\/]/).pop() || `${baseName}_compressed.${ext}`
+        showToast(`Compressed file saved to: ${finalName}`, 'success')
+
         // Add to history
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
           timestamp: new Date().toISOString(),
-          fileName: selectedFile.name.substring(0, selectedFile.name.lastIndexOf('.')) + '_compressed.' + selectedFile.name.split('.').pop(),
-          filePath: compressionResult.filePath,
+          fileName: finalName,
+          filePath: outPath,
           fileSize: compressionResult.compressedSize,
           operation: 'File Compression',
           status: 'Success'
@@ -218,7 +230,11 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
 
   const originalSizeKB = selectedFile ? (selectedFile.size / 1024).toFixed(1) : '0'
   const savingsPct = compressionResult
-    ? (((compressionResult.originalSize - compressionResult.compressedSize) / compressionResult.originalSize) * 100).toFixed(0)
+    ? (
+        ((compressionResult.originalSize - compressionResult.compressedSize) /
+          compressionResult.originalSize) *
+        100
+      ).toFixed(0)
     : '0'
 
   return (
@@ -245,7 +261,15 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
           />
         </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px', height: '100%', alignItems: 'stretch' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 320px',
+            gap: '20px',
+            height: '100%',
+            alignItems: 'stretch'
+          }}
+        >
           {/* Main workspace info */}
           <div
             className="studio-card"
@@ -277,7 +301,9 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
 
             <div style={{ textAlign: 'center' }}>
               <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>{selectedFile.name}</h3>
-              <p style={{ color: 'var(--color-text-secondary)' }}>Original Size: {originalSizeKB} KB</p>
+              <p style={{ color: 'var(--color-text-secondary)' }}>
+                Original Size: {originalSizeKB} KB
+              </p>
             </div>
 
             {compressionResult && (
@@ -290,7 +316,9 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
                   textAlign: 'center'
                 }}
               >
-                <h4 style={{ color: 'var(--color-success)', fontSize: '15px', marginBottom: '6px' }}>
+                <h4
+                  style={{ color: 'var(--color-success)', fontSize: '15px', marginBottom: '6px' }}
+                >
                   Compression Successful!
                 </h4>
                 <p style={{ fontSize: '13px' }}>
@@ -299,7 +327,13 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
                     {(compressionResult.compressedSize / 1024).toFixed(1)} KB
                   </span>
                 </p>
-                <p style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
+                <p
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--color-text-secondary)',
+                    marginTop: '4px'
+                  }}
+                >
                   Reduced file size by {savingsPct}%
                 </p>
               </div>
@@ -369,7 +403,11 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
             ) : (
               <button
                 className="btn btn-primary"
-                style={{ width: '100%', marginTop: '12px', backgroundColor: 'var(--color-success)' }}
+                style={{
+                  width: '100%',
+                  marginTop: '12px',
+                  backgroundColor: 'var(--color-success)'
+                }}
                 onClick={saveCompressedFile}
               >
                 <Download size={16} />
@@ -379,7 +417,9 @@ export const CompressionTools: React.FC<CompressionToolsProps> = ({ showToast })
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)' }} />
 
-            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+            <div
+              style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}
+            >
               <h4 style={{ fontSize: '11px', marginBottom: '4px', fontWeight: 600 }}>Details</h4>
               <p>Image compressor reduces resolution and pixel quality recursively.</p>
               <p style={{ marginTop: '4px' }}>PDF compressor downsamples objects structure.</p>

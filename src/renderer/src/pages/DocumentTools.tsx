@@ -1,12 +1,6 @@
 import React, { useState } from 'react'
 import { Card } from '../components/Card'
-import {
-  Upload,
-  FileText,
-  Printer,
-  ArrowRightLeft,
-  Trash2
-} from 'lucide-react'
+import { Upload, FileText, Printer, ArrowRightLeft, Trash2 } from 'lucide-react'
 import mammoth from 'mammoth'
 import * as XLSX from 'xlsx'
 
@@ -76,7 +70,7 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
         const arrayBuffer = await file.arrayBuffer()
         const workbook = XLSX.read(arrayBuffer, { type: 'array' })
         const sheets: { name: string; html: string }[] = []
-        
+
         workbook.SheetNames.forEach((sheetName) => {
           const worksheet = workbook.Sheets[sheetName]
           const html = XLSX.utils.sheet_to_html(worksheet)
@@ -160,9 +154,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
 
       const response = await window.api.printToPDF(htmlContent)
       if (response.success && response.data) {
-        const defaultFolder = await window.api.getSetting('defaultSaveFolder')
+        const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
         const baseName = selectedFile.name.substring(0, selectedFile.name.lastIndexOf('.'))
-        const suggestedPath = `${defaultFolder}/${baseName}.pdf`
+        const suggestedPath = defaultFolder ? `${defaultFolder}/${baseName}.pdf` : `${baseName}.pdf`
 
         const outPath = await window.api.selectSavePath({
           title: 'Convert & Save Document As PDF',
@@ -267,7 +261,15 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
           />
         </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px', height: '100%', alignItems: 'stretch' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 320px',
+            gap: '20px',
+            height: '100%',
+            alignItems: 'stretch'
+          }}
+        >
           {/* Document Preview Panel */}
           <div
             className="studio-card"
@@ -295,7 +297,11 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
                 <FileText size={20} style={{ color: 'var(--color-primary)' }} />
                 <span style={{ fontWeight: 600, fontSize: '13px' }}>{selectedFile.name}</span>
               </div>
-              <button className="btn btn-secondary btn-icon-only" onClick={clearWorkspace} style={{ color: 'var(--color-error)' }}>
+              <button
+                className="btn btn-secondary btn-icon-only"
+                onClick={clearWorkspace}
+                style={{ color: 'var(--color-error)' }}
+              >
                 <Trash2 size={14} />
               </button>
             </div>
@@ -326,7 +332,14 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
 
                   {fileContent.type === 'xlsx' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '8px' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: '6px',
+                          overflowX: 'auto',
+                          paddingBottom: '8px'
+                        }}
+                      >
                         {(fileContent.data as any[]).map((sheet, idx) => (
                           <button
                             key={idx}
@@ -344,7 +357,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
                           borderRadius: 'var(--radius-sm)',
                           padding: '12px'
                         }}
-                        dangerouslySetInnerHTML={{ __html: (fileContent.data as any[])[activeSheetIdx].html }}
+                        dangerouslySetInnerHTML={{
+                          __html: (fileContent.data as any[])[activeSheetIdx].html
+                        }}
                       />
                     </div>
                   )}
@@ -358,7 +373,13 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
                   )}
 
                   {fileContent.type === 'other' && (
-                    <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-light)' }}>
+                    <div
+                      style={{
+                        textAlign: 'center',
+                        padding: '40px 0',
+                        color: 'var(--color-text-light)'
+                      }}
+                    >
                       <FileText size={48} style={{ opacity: 0.5, marginBottom: '12px' }} />
                       <p>Format preview is not supported for this extension.</p>
                       <p style={{ fontSize: '11px', marginTop: '4px' }}>
@@ -397,7 +418,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
               </select>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
+            <div
+              style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}
+            >
               <button
                 className="btn btn-secondary"
                 onClick={printDocument}
@@ -410,7 +433,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
               <button
                 className="btn btn-primary"
                 onClick={convertToPdf}
-                disabled={!fileContent || fileContent.type === 'pdf' || fileContent.type === 'other'}
+                disabled={
+                  !fileContent || fileContent.type === 'pdf' || fileContent.type === 'other'
+                }
               >
                 <ArrowRightLeft size={16} />
                 Convert to PDF
@@ -419,7 +444,9 @@ export const DocumentTools: React.FC<DocumentToolsProps> = ({ showToast }) => {
 
             <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)' }} />
 
-            <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+            <div
+              style={{ fontSize: '12px', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}
+            >
               <h4 style={{ fontSize: '12px', marginBottom: '4px', fontWeight: 600 }}>Info</h4>
               <p>DOCX conversion operates local rendering engine into PDF.</p>
               <p style={{ marginTop: '4px' }}>XLSX exports all sheet sheets styled as tables.</p>

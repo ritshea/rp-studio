@@ -71,7 +71,7 @@ app.whenReady().then(() => {
   })
 
   // ---- IPC Handlers ----
-  
+
   // Get system printers
   ipcMain.handle('get-printers', async () => {
     if (!mainWindow) return []
@@ -103,19 +103,19 @@ app.whenReady().then(() => {
       filters: options.filters || [],
       properties: options.properties || ['openFile', 'multiSelections']
     })
-    
+
     if (!result.canceled && result.filePaths.length > 0) {
       return Promise.all(
         result.filePaths.map(async (filePath) => {
           const stats = fs.statSync(filePath)
           const name = path.basename(filePath)
-          
+
           let base64Data: string | undefined
           if (options.readAsBase64) {
             const buffer = fs.readFileSync(filePath)
             base64Data = buffer.toString('base64')
           }
-          
+
           return {
             filePath,
             name,
@@ -149,7 +149,7 @@ app.whenReady().then(() => {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true })
       }
-      
+
       if (typeof data === 'string') {
         if (data.startsWith('data:')) {
           const base64Content = data.split(';base64,').pop()
@@ -169,7 +169,7 @@ app.whenReady().then(() => {
       } else {
         fs.writeFileSync(filePath, Buffer.from(data))
       }
-      
+
       return { success: true, filePath }
     } catch (err: any) {
       console.error('Failed to save file:', err)
@@ -224,20 +224,20 @@ app.whenReady().then(() => {
           sandbox: true
         }
       })
-      
+
       await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`)
-      
+
       const pdfOptions: Electron.PrintToPDFOptions = {
         pageSize: options.pageSize || 'A4',
         margins: options.margins || { top: 0, bottom: 0, left: 0, right: 0 },
         printBackground: true,
         landscape: options.landscape || false
       }
-      
+
       const pdfBuffer = await printWindow.webContents.printToPDF(pdfOptions)
       printWindow.close()
       printWindow = null
-      
+
       return { success: true, data: pdfBuffer.toString('base64') }
     } catch (err: any) {
       console.error('print-to-pdf error', err)
@@ -262,9 +262,9 @@ app.whenReady().then(() => {
           sandbox: true
         }
       })
-      
+
       await printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`)
-      
+
       const printOptions: Electron.WebContentsPrintOptions = {
         silent: options.silent !== undefined ? options.silent : false,
         printBackground: true,
@@ -276,7 +276,7 @@ app.whenReady().then(() => {
         pagesPerSheet: options.pagesPerSheet || 1,
         copies: options.copies || 1
       }
-      
+
       const finalPrintWindow = printWindow
       return new Promise((resolve) => {
         finalPrintWindow.webContents.print(printOptions, (success, failureReason) => {
@@ -317,4 +317,3 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-

@@ -20,24 +20,26 @@ interface PdfToolsProps {
 }
 
 export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
-  const [activeTab, setActiveTab] = useState<'merge' | 'split' | 'extract' | 'imagesToPdf' | 'security'>('merge')
-  
+  const [activeTab, setActiveTab] = useState<
+    'merge' | 'split' | 'extract' | 'imagesToPdf' | 'security'
+  >('merge')
+
   // Merge State
-  const [mergeFiles, setMergeFiles] = useState<any[]>([])
-  
+  const [mergeFiles, setMergeFiles] = useState<File[]>([])
+
   // Split State
-  const [splitFile, setSplitFile] = useState<any | null>(null)
+  const [splitFile, setSplitFile] = useState<File | null>(null)
   const [splitRange, setSplitRange] = useState<string>('1-2')
-  
+
   // Extract State
-  const [extractFile, setExtractFile] = useState<any | null>(null)
+  const [extractFile, setExtractFile] = useState<File | null>(null)
   const [extractPages, setExtractPages] = useState<string>('1, 3')
 
   // Images to PDF State
-  const [imageFiles, setImageFiles] = useState<any[]>([])
+  const [imageFiles, setImageFiles] = useState<File[]>([])
 
   // Security State
-  const [secFile, setSecFile] = useState<any | null>(null)
+  const [secFile, setSecFile] = useState<File | null>(null)
   const [secPassword, setSecPassword] = useState<string>('')
   const [secAction, setSecAction] = useState<'encrypt' | 'decrypt'>('encrypt')
 
@@ -50,7 +52,7 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
   const handleMergeDrop = async (e: React.DragEvent): Promise<void> => {
     e.preventDefault()
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const newFiles: any[] = []
+      const newFiles: File[] = []
       for (let i = 0; i < e.dataTransfer.files.length; i++) {
         const file = e.dataTransfer.files[i]
         if (file.name.toLowerCase().endsWith('.pdf')) {
@@ -68,7 +70,7 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
   const handleMergeSelect = (e: React.ChangeEvent<HTMLInputElement>): void => {
     if (e.target.files && e.target.files.length > 0) {
-      const newFiles: any[] = []
+      const newFiles: File[] = []
       for (let i = 0; i < e.target.files.length; i++) {
         const file = e.target.files[i]
         if (file.name.toLowerCase().endsWith('.pdf')) {
@@ -112,15 +114,17 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       const mergedPdf = await PDFDocument.create()
 
       for (const file of mergeFiles) {
-        const fileBytes = await file.arrayBuffer() as ArrayBuffer
+        const fileBytes = (await file.arrayBuffer()) as ArrayBuffer
         const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true })
         const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices())
         copiedPages.forEach((page) => mergedPdf.addPage(page))
       }
 
       const mergedPdfBytes = await mergedPdf.save()
-      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const suggestedPath = `${defaultFolder}/merged_${Date.now()}.pdf`
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
+      const suggestedPath = defaultFolder
+        ? `${defaultFolder}/merged_${Date.now()}.pdf`
+        : `merged_${Date.now()}.pdf`
 
       const outPath = await window.api.selectSavePath({
         title: 'Save Merged PDF As',
@@ -150,9 +154,10 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       } else {
         showToast(`Failed to save merged PDF: ${result.error}`, 'error')
       }
-    } catch (e: any) {
-      console.error(e)
-      showToast(`Error during merge: ${e.message}`, 'error')
+    } catch (e) {
+      const err = e as Error
+      console.error(err)
+      showToast(`Error during merge: ${err.message}`, 'error')
     }
   }
 
@@ -164,7 +169,7 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
     try {
       showToast('Processing split...', 'info')
-      const fileBytes = await splitFile.arrayBuffer() as ArrayBuffer
+      const fileBytes = (await splitFile.arrayBuffer()) as ArrayBuffer
       const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true })
       const pageCount = pdfDoc.getPageCount()
 
@@ -188,8 +193,10 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       copiedPages.forEach((page) => splitPdf.addPage(page))
 
       const splitPdfBytes = await splitPdf.save()
-      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const suggestedPath = `${defaultFolder}/split_${start}-${end}_${splitFile.name}`
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
+      const suggestedPath = defaultFolder
+        ? `${defaultFolder}/split_${start}-${end}_${splitFile.name}`
+        : `split_${start}-${end}_${splitFile.name}`
 
       const outPath = await window.api.selectSavePath({
         title: 'Save Split PDF As',
@@ -219,8 +226,9 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       } else {
         showToast(`Save failed: ${result.error}`, 'error')
       }
-    } catch (e: any) {
-      showToast(`Error: ${e.message}`, 'error')
+    } catch (e) {
+      const err = e as Error
+      showToast(`Error: ${err.message}`, 'error')
     }
   }
 
@@ -232,7 +240,7 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
     try {
       showToast('Extracting pages...', 'info')
-      const fileBytes = await extractFile.arrayBuffer() as ArrayBuffer
+      const fileBytes = (await extractFile.arrayBuffer()) as ArrayBuffer
       const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true })
       const pageCount = pdfDoc.getPageCount()
 
@@ -253,8 +261,10 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       copiedPages.forEach((page) => extractedPdf.addPage(page))
 
       const extractedBytes = await extractedPdf.save()
-      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const suggestedPath = `${defaultFolder}/extracted_${extractFile.name}`
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
+      const suggestedPath = defaultFolder
+        ? `${defaultFolder}/extracted_${extractFile.name}`
+        : `extracted_${extractFile.name}`
 
       const outPath = await window.api.selectSavePath({
         title: 'Save Extracted Pages PDF As',
@@ -284,15 +294,16 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       } else {
         showToast(`Save failed: ${result.error}`, 'error')
       }
-    } catch (e: any) {
-      showToast(`Error: ${e.message}`, 'error')
+    } catch (e) {
+      const err = e as Error
+      showToast(`Error: ${err.message}`, 'error')
     }
   }
 
   const handleImageDrop = (e: React.DragEvent): void => {
     e.preventDefault()
     if (e.dataTransfer.files) {
-      const newFiles: any[] = []
+      const newFiles: File[] = []
       for (let i = 0; i < e.dataTransfer.files.length; i++) {
         const file = e.dataTransfer.files[i]
         const ext = file.name.toLowerCase()
@@ -315,7 +326,7 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       const pdfDoc = await PDFDocument.create()
 
       for (const img of imageFiles) {
-        const imgBytes = await img.arrayBuffer() as ArrayBuffer
+        const imgBytes = (await img.arrayBuffer()) as ArrayBuffer
         let pdfImage
         if (img.name.toLowerCase().endsWith('.png')) {
           pdfImage = await pdfDoc.embedPng(imgBytes)
@@ -333,8 +344,10 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       }
 
       const pdfBytes = await pdfDoc.save()
-      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      const suggestedPath = `${defaultFolder}/images_compiled_${Date.now()}.pdf`
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
+      const suggestedPath = defaultFolder
+        ? `${defaultFolder}/images_compiled_${Date.now()}.pdf`
+        : `images_compiled_${Date.now()}.pdf`
 
       const outPath = await window.api.selectSavePath({
         title: 'Save Compiled PDF As',
@@ -364,8 +377,9 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       } else {
         showToast(`Save failed: ${result.error}`, 'error')
       }
-    } catch (e: any) {
-      showToast(`Error compiling PDF: ${e.message}`, 'error')
+    } catch (e) {
+      const err = e as Error
+      showToast(`Error compiling PDF: ${err.message}`, 'error')
     }
   }
 
@@ -377,18 +391,20 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
     try {
       showToast(`${secAction === 'encrypt' ? 'Protecting' : 'Decrypting'} PDF...`, 'info')
-      const fileBytes = await secFile.arrayBuffer() as ArrayBuffer
+      const fileBytes = (await secFile.arrayBuffer()) as ArrayBuffer
       const pdfDoc = await PDFDocument.load(fileBytes, { ignoreEncryption: true })
-      
+
       // pdf-lib does not support direct AES encryption. We simulate the encryption tagging
       // by editing metadata or returning a customized protected file with password logs.
       pdfDoc.setTitle(`${secAction === 'encrypt' ? 'Protected' : 'Unlocked'} File`)
       pdfDoc.setSubject(`Password Secured: ${secPassword}`)
-      
+
       const pdfBytes = await pdfDoc.save()
-      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
       const prefix = secAction === 'encrypt' ? 'protected_' : 'unlocked_'
-      const suggestedPath = `${defaultFolder}/${prefix}${secFile.name}`
+      const suggestedPath = defaultFolder
+        ? `${defaultFolder}/${prefix}${secFile.name}`
+        : `${prefix}${secFile.name}`
 
       const outPath = await window.api.selectSavePath({
         title: `${secAction === 'encrypt' ? 'Encrypt' : 'Decrypt'} & Save PDF As`,
@@ -419,8 +435,9 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
       } else {
         showToast(`Save failed: ${result.error}`, 'error')
       }
-    } catch (e: any) {
-      showToast(`Security error: ${e.message}`, 'error')
+    } catch (e) {
+      const err = e as Error
+      showToast(`Security error: ${err.message}`, 'error')
     }
   }
 
@@ -485,9 +502,14 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
           {mergeFiles.length > 0 && (
             <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <h4>Selected Files ({mergeFiles.length})</h4>
-                <button className="btn btn-secondary btn-danger" onClick={(): void => setMergeFiles([])}>
+                <button
+                  className="btn btn-secondary btn-danger"
+                  onClick={(): void => setMergeFiles([])}
+                >
                   Clear List
                 </button>
               </div>
@@ -575,7 +597,9 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
             </Card>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                   <FileText size={24} style={{ color: 'var(--color-primary)' }} />
                   <div>
@@ -638,7 +662,9 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
             </Card>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                   <FileText size={24} style={{ color: 'var(--color-primary)' }} />
                   <div>
@@ -700,14 +726,25 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
 
           {imageFiles.length > 0 && (
             <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <h4>Selected Images ({imageFiles.length})</h4>
-                <button className="btn btn-secondary btn-danger" onClick={(): void => setImageFiles([])}>
+                <button
+                  className="btn btn-secondary btn-danger"
+                  onClick={(): void => setImageFiles([])}
+                >
                   Clear Images
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '12px' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+                  gap: '12px'
+                }}
+              >
                 {imageFiles.map((file, idx) => (
                   <div
                     key={idx}
@@ -720,7 +757,10 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
                       backgroundColor: 'var(--color-secondary)'
                     }}
                   >
-                    <FileImage size={24} style={{ color: 'var(--color-primary)', marginBottom: '4px' }} />
+                    <FileImage
+                      size={24}
+                      style={{ color: 'var(--color-primary)', marginBottom: '4px' }}
+                    />
                     <div
                       style={{
                         fontSize: '10px',
@@ -732,7 +772,9 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
                       {file.name}
                     </div>
                     <button
-                      onClick={(): void => setImageFiles((prev) => prev.filter((_, i) => i !== idx))}
+                      onClick={(): void =>
+                        setImageFiles((prev) => prev.filter((_, i) => i !== idx))
+                      }
                       style={{
                         position: 'absolute',
                         top: '-4px',
@@ -790,7 +832,9 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
             </Card>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                   <FileText size={24} style={{ color: 'var(--color-primary)' }} />
                   <div>
@@ -811,7 +855,7 @@ export const PdfTools: React.FC<PdfToolsProps> = ({ showToast }) => {
                   <select
                     className="form-control form-select"
                     value={secAction}
-                    onChange={(e): void => setSecAction(e.target.value as any)}
+                    onChange={(e): void => setSecAction(e.target.value as 'encrypt' | 'decrypt')}
                   >
                     <option value="encrypt">Lock (Add Password)</option>
                     <option value="decrypt">Unlock (Remove Password)</option>

@@ -1,5 +1,6 @@
 appId: com.virajai.rpstudio
 productName: RP Studio
+copyright: Copyright © 2026 RP Creation. All rights reserved.
 directories:
   buildResources: build
 files:
@@ -9,11 +10,27 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!node_modules/**/*.map'
+  - '!node_modules/**/*.ts'
+  - '!node_modules/**/*.d.ts'
+  - '!node_modules/**/tsconfig.json'
+  - '!node_modules/**/README.md'
+  - '!node_modules/**/LICENSE*'
+  - '!node_modules/**/CHANGELOG*'
+  - '!node_modules/**/.tshy/**/*'
+  - '!node_modules/**/.turbo/**/*'
 asarUnpack:
   - resources/**
 compression: maximum
+electronLanguages:
+  - en-US
 win:
   executableName: rp-studio
+  publisherName:
+    - RP Creation
+  target:
+    - target: nsis
+    - target: nsis-web
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
@@ -24,6 +41,8 @@ nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   createDesktopShortcut: always
+  createStartMenuShortcut: true
+  runAfterFinish: true
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
@@ -47,4 +66,3 @@ npmRebuild: false
 publish:
   provider: generic
   url: https://virajai.com/rpstudio/updates
-

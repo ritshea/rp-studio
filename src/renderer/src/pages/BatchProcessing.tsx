@@ -1,9 +1,6 @@
 import React, { useState } from 'react'
 import { Card } from '../components/Card'
-import {
-  Upload,
-  Play
-} from 'lucide-react'
+import { Upload, Play } from 'lucide-react'
 
 interface BatchFile {
   id: string
@@ -21,8 +18,10 @@ interface BatchProcessingProps {
 
 export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) => {
   const [files, setFiles] = useState<BatchFile[]>([])
-  const [operation, setOperation] = useState<'compress' | 'convert' | 'resize' | 'rename'>('compress')
-  
+  const [operation, setOperation] = useState<'compress' | 'convert' | 'resize' | 'rename'>(
+    'compress'
+  )
+
   // Params
   const [targetSize, setTargetSize] = useState<string>('100') // Compress
   const [targetFormat, setTargetFormat] = useState<string>('png') // Convert
@@ -96,12 +95,15 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
     })
   }
 
-  const processSingleFile = async (item: BatchFile, idx: number): Promise<{ success: boolean; msg?: string }> => {
+  const processSingleFile = async (
+    item: BatchFile,
+    idx: number
+  ): Promise<{ success: boolean; msg?: string }> => {
     try {
-      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
       const baseName = item.name.substring(0, item.name.lastIndexOf('.'))
       const ext = item.type
-      
+
       let outPath = ''
 
       if (operation === 'compress') {
@@ -141,9 +143,7 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
         } else {
           return { success: false, msg: 'Compress only supports image formats bulk.' }
         }
-      }
-
-      else if (operation === 'convert') {
+      } else if (operation === 'convert') {
         outPath = `${defaultFolder}/${baseName}.${targetFormat}`
         if (['png', 'jpg', 'jpeg', 'webp'].includes(ext)) {
           return new Promise((resolve) => {
@@ -171,9 +171,7 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
         } else {
           return { success: false, msg: 'Bulk converter only handles images.' }
         }
-      }
-
-      else if (operation === 'resize') {
+      } else if (operation === 'resize') {
         if (['png', 'jpg', 'jpeg', 'webp'].includes(ext)) {
           outPath = `${defaultFolder}/${baseName}_resized.${ext}`
           const dataUrl = await processImageResize(item.file, resizePercent)
@@ -182,14 +180,12 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
         } else {
           return { success: false, msg: 'Resizing only supports images.' }
         }
-      }
-
-      else if (operation === 'rename') {
+      } else if (operation === 'rename') {
         // pattern formatting e.g. item_003
         const numStr = String(idx + 1).padStart(3, '0')
         const formattedName = renamePattern.replace('###', numStr)
         outPath = `${defaultFolder}/${formattedName}.${ext}`
-        
+
         // Save file bytes directly
         const bytes = await item.file.arrayBuffer()
         const saveRes = await window.api.saveFile(outPath, bytes)
@@ -205,6 +201,19 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
   // Trigger Sequential Processing
   const runBatch = async (): Promise<void> => {
     if (files.length === 0) return
+
+    const defaultFolder = await window.api.getSetting('defaultSaveFolder')
+    if (!defaultFolder) {
+      showToast('Please select a destination folder for batch operations!', 'info')
+      const chosen = await window.api.selectDirectory()
+      if (chosen) {
+        await window.api.setSetting('defaultSaveFolder', chosen)
+        showToast(`Destination folder configured: ${chosen}`, 'success')
+      } else {
+        return
+      }
+    }
+
     setIsRunning(true)
     setProgress(0)
     setLogs([])
@@ -213,13 +222,11 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
     for (let i = 0; i < files.length; i++) {
       const item = files[i]
       addLog(`Processing file [${i + 1}/${files.length}]: ${item.name}`)
-      
-      setFiles((prev) =>
-        prev.map((f) => (f.id === item.id ? { ...f, status: 'processing' } : f))
-      )
+
+      setFiles((prev) => prev.map((f) => (f.id === item.id ? { ...f, status: 'processing' } : f)))
 
       const result = await processSingleFile(item, i)
-      
+
       setFiles((prev) =>
         prev.map((f) =>
           f.id === item.id
@@ -234,7 +241,7 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
 
       if (result.success) {
         addLog(`Successfully processed ${item.name}`)
-        
+
         // Add record to database
         await window.api.addHistory({
           id: Math.random().toString(36).substring(7),
@@ -258,7 +265,14 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '20px', height: 'calc(100% - 20px)' }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 340px',
+        gap: '20px',
+        height: 'calc(100% - 20px)'
+      }}
+    >
       {/* Left panel: File list tray + Progress console */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
         {files.length === 0 ? (
@@ -283,10 +297,22 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
             />
           </Card>
         ) : (
-          <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, overflowY: 'auto' }}>
+          <Card
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              flex: 1,
+              overflowY: 'auto'
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4>Batch Queue ({files.length} files)</h4>
-              <button className="btn btn-secondary btn-danger" disabled={isRunning} onClick={(): void => setFiles([])}>
+              <button
+                className="btn btn-secondary btn-danger"
+                disabled={isRunning}
+                onClick={(): void => setFiles([])}
+              >
                 Clear Queue
               </button>
             </div>
@@ -298,13 +324,35 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
                   <span>Batch Status: Running...</span>
                   <span>{progress}%</span>
                 </div>
-                <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--color-secondary)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ width: `${progress}%`, height: '100%', backgroundColor: 'var(--color-primary)', transition: 'width 0.2s ease' }} />
+                <div
+                  style={{
+                    width: '100%',
+                    height: '8px',
+                    backgroundColor: 'var(--color-secondary)',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${progress}%`,
+                      height: '100%',
+                      backgroundColor: 'var(--color-primary)',
+                      transition: 'width 0.2s ease'
+                    }}
+                  />
                 </div>
               </div>
             )}
 
-            <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+            <div
+              style={{
+                maxHeight: '200px',
+                overflowY: 'auto',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-sm)'
+              }}
+            >
               <table className="file-list" style={{ marginTop: 0 }}>
                 <tbody>
                   {files.map((item, idx) => (
@@ -321,10 +369,10 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
                               item.status === 'success'
                                 ? '#10b981'
                                 : item.status === 'failed'
-                                ? '#ef4444'
-                                : item.status === 'processing'
-                                ? '#3b82f6'
-                                : '#5f5e5a'
+                                  ? '#ef4444'
+                                  : item.status === 'processing'
+                                    ? '#3b82f6'
+                                    : '#5f5e5a'
                           }}
                         >
                           {item.status.toUpperCase()}
@@ -339,7 +387,13 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
             {/* Console logs */}
             {logs.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+                <label
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: 'var(--color-text-secondary)'
+                  }}
+                >
                   Console Logs:
                 </label>
                 <div
@@ -364,7 +418,15 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
       </div>
 
       {/* Right configuration sidebar */}
-      <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', overflowY: 'auto' }}>
+      <Card
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          height: '100%',
+          overflowY: 'auto'
+        }}
+      >
         <h3 style={{ fontFamily: 'Outfit, sans-serif' }}>Batch Configuration</h3>
 
         {/* Operation Selection */}
@@ -443,7 +505,7 @@ export const BatchProcessing: React.FC<BatchProcessingProps> = ({ showToast }) =
               disabled={isRunning}
             />
             <span style={{ fontSize: '10px', color: 'var(--color-text-light)', marginTop: '4px' }}>
-              {"e.g. photo_### -> photo_001, photo_002"}
+              {'e.g. photo_### -> photo_001, photo_002'}
             </span>
           </div>
         )}

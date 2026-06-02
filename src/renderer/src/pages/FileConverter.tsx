@@ -1,10 +1,6 @@
 import React, { useState } from 'react'
 import { Card } from '../components/Card'
-import {
-  Upload,
-  Trash2,
-  Play
-} from 'lucide-react'
+import { Upload, Trash2, Play } from 'lucide-react'
 import mammoth from 'mammoth'
 import * as XLSX from 'xlsx'
 
@@ -25,7 +21,7 @@ interface FileConverterProps {
 
 export const FileConverter: React.FC<FileConverterProps> = ({ showToast }) => {
   const [files, setFiles] = useState<FileItem[]>([])
-  
+
   const handleDragOver = (e: React.DragEvent): void => {
     e.preventDefault()
   }
@@ -64,9 +60,7 @@ export const FileConverter: React.FC<FileConverterProps> = ({ showToast }) => {
   }
 
   const updateFormat = (id: string, format: string): void => {
-    setFiles((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, targetFormat: format } : f))
-    )
+    setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, targetFormat: format } : f)))
   }
 
   const removeFile = (id: string): void => {
@@ -74,18 +68,39 @@ export const FileConverter: React.FC<FileConverterProps> = ({ showToast }) => {
   }
 
   // Perform single file conversion
-  const convertSingleFile = async (item: FileItem): Promise<{ success: boolean; error?: string }> => {
+  const convertSingleFile = async (
+    item: FileItem,
+    promptSaveAs = false
+  ): Promise<{ success: boolean; error?: string }> => {
     const ext = item.type
     const target = item.targetFormat
     const file = item.file
 
     try {
-      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
       const baseName = item.name.substring(0, item.name.lastIndexOf('.'))
-      const outPath = `${defaultFolder}/${baseName}_converted.${target}`
+      const suggestedPath = defaultFolder
+        ? `${defaultFolder}/${baseName}_converted.${target}`
+        : `${baseName}_converted.${target}`
+
+      let outPath = suggestedPath
+      if (promptSaveAs) {
+        const out = await window.api.selectSavePath({
+          title: `Save Converted ${target.toUpperCase()} As`,
+          defaultPath: suggestedPath,
+          filters: [{ name: `${target.toUpperCase()} Documents`, extensions: [target] }]
+        })
+        if (!out) {
+          return { success: false, error: 'Save cancelled' }
+        }
+        outPath = out
+      }
 
       // Case A: Image format conversion (PNG/JPG/WEBP)
-      if (['png', 'jpg', 'jpeg', 'webp', 'bmp'].includes(ext) && ['png', 'jpeg', 'webp'].includes(target)) {
+      if (
+        ['png', 'jpg', 'jpeg', 'webp', 'bmp'].includes(ext) &&
+        ['png', 'jpeg', 'webp'].includes(target)
+      ) {
         return new Promise((resolve) => {
           const reader = new FileReader()
           reader.onload = (): void => {
@@ -153,7 +168,10 @@ export const FileConverter: React.FC<FileConverterProps> = ({ showToast }) => {
         return { success: saveRes.success, error: saveRes.error }
       }
 
-      return { success: false, error: `Conversion from ${ext.toUpperCase()} to ${target.toUpperCase()} not implemented.` }
+      return {
+        success: false,
+        error: `Conversion from ${ext.toUpperCase()} to ${target.toUpperCase()} not implemented.`
+      }
     } catch (e: any) {
       return { success: false, error: e.message }
     }
@@ -163,19 +181,37 @@ export const FileConverter: React.FC<FileConverterProps> = ({ showToast }) => {
   const runConversionList = async (): Promise<void> => {
     if (files.length === 0) return
 
-    showToast('Starting batch conversions...', 'info')
-    
+    const pendingFiles = files.filter((f) => f.status !== 'success')
+    if (pendingFiles.length === 0) return
+
+    const isSingle = pendingFiles.length === 1
+
+    // If batch (multiple files), ensure defaultSaveFolder is configured
+    if (!isSingle) {
+      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
+      if (!defaultFolder) {
+        showToast('Please select a destination folder for your batch output!', 'info')
+        const chosen = await window.api.selectDirectory()
+        if (chosen) {
+          await window.api.setSetting('defaultSaveFolder', chosen)
+          showToast(`Destination folder configured: ${chosen}`, 'success')
+        } else {
+          return
+        }
+      }
+    }
+
+    showToast(isSingle ? 'Opening Save As dialogue...' : 'Starting batch conversions...', 'info')
+
     // Convert files sequentially
     for (let i = 0; i < files.length; i++) {
       const item = files[i]
       if (item.status === 'success') continue // skip completed
 
       // Update status to converting
-      setFiles((prev) =>
-        prev.map((f) => (f.id === item.id ? { ...f, status: 'converting' } : f))
-      )
+      setFiles((prev) => prev.map((f) => (f.id === item.id ? { ...f, status: 'converting' } : f)))
 
-      const result = await convertSingleFile(item)
+      const result = await convertSingleFile(item, isSingle)
 
       // Update outcome
       setFiles((prev) =>
@@ -243,7 +279,15 @@ export const FileConverter: React.FC<FileConverterProps> = ({ showToast }) => {
       </Card>
 
       {files.length > 0 && (
-        <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, overflowY: 'auto' }}>
+        <Card
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            flex: 1,
+            overflowY: 'auto'
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h4>Conversion Queue ({files.length} items)</h4>
             <button className="btn btn-secondary btn-danger" onClick={(): void => setFiles([])}>
@@ -304,10 +348,10 @@ export const FileConverter: React.FC<FileConverterProps> = ({ showToast }) => {
                           item.status === 'success'
                             ? '#10b981'
                             : item.status === 'failed'
-                            ? '#ef4444'
-                            : item.status === 'converting'
-                            ? '#3b82f6'
-                            : '#5f5e5a'
+                              ? '#ef4444'
+                              : item.status === 'converting'
+                                ? '#3b82f6'
+                                : '#5f5e5a'
                       }}
                     >
                       {item.status.toUpperCase()}

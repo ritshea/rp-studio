@@ -46,7 +46,10 @@ function App(): React.JSX.Element {
     }
   }
 
-  const showToast = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success'): void => {
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'success'
+  ): void => {
     const id = Math.random().toString(36).substring(7)
     setToasts((prev) => [...prev, { id, message, type }])
   }
@@ -93,10 +96,22 @@ function App(): React.JSX.Element {
     { id: 'image', label: 'Image Tools', icon: <ImageIcon className="menu-item-icon" /> },
     { id: 'pdf', label: 'PDF Tools', icon: <FileText className="menu-item-icon" /> },
     { id: 'document', label: 'Document Tools', icon: <FileText className="menu-item-icon" /> },
-    { id: 'passport', label: 'Passport Photo Maker', icon: <CompassIcon className="menu-item-icon" /> },
+    {
+      id: 'passport',
+      label: 'Passport Photo Maker',
+      icon: <CompassIcon className="menu-item-icon" />
+    },
     { id: 'layout', label: 'Print Layout Grid', icon: <Printer className="menu-item-icon" /> },
-    { id: 'converter', label: 'File Converter', icon: <ArrowRightLeft className="menu-item-icon" /> },
-    { id: 'compression', label: 'Compression Tools', icon: <Minimize2 className="menu-item-icon" /> },
+    {
+      id: 'converter',
+      label: 'File Converter',
+      icon: <ArrowRightLeft className="menu-item-icon" />
+    },
+    {
+      id: 'compression',
+      label: 'Compression Tools',
+      icon: <Minimize2 className="menu-item-icon" />
+    },
     { id: 'batch', label: 'Batch Processing', icon: <Sparkles className="menu-item-icon" /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon className="menu-item-icon" /> }
   ]
@@ -116,7 +131,7 @@ function App(): React.JSX.Element {
             <h1 className="brand-name">RP Studio</h1>
           </div>
           <div className="brand-tagline">Smart Printing, Documents & Image Studio</div>
-          <div className="brand-version">v1.4.2 Stable</div>
+          <div className="brand-version">v1.4.3 Stable</div>
         </div>
 
         <nav className="sidebar-menu">
@@ -163,11 +178,24 @@ function App(): React.JSX.Element {
               <button className="header-folder-btn" onClick={openOutputFolder}>
                 <FolderOpen size={14} />
                 <span style={{ fontSize: '11px' }}>
-                  Output: {saveFolder.split(window.navigator.platform.includes('Win') ? '\\' : '/').pop()}
+                  Output:{' '}
+                  {saveFolder.split(window.navigator.platform.includes('Win') ? '\\' : '/').pop()}
                 </span>
               </button>
             )}
-            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', fontSize: '11px', color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-secondary)', padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--color-border)' }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '4px',
+                alignItems: 'center',
+                fontSize: '11px',
+                color: 'var(--color-text-secondary)',
+                backgroundColor: 'var(--color-secondary)',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                border: '1px solid var(--color-border)'
+              }}
+            >
               <PrinterCheck size={14} style={{ color: '#10b981' }} />
               <span>Studio Printer Connected</span>
             </div>
@@ -203,4 +231,3 @@ function App(): React.JSX.Element {
 }
 
 export default App
-

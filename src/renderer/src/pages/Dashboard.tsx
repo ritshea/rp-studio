@@ -119,11 +119,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, showToast })
         }}
       >
         <div style={{ position: 'relative', zIndex: 2 }}>
-          <h1 style={{ color: 'white', fontSize: '28px', marginBottom: '8px', fontFamily: 'Outfit, sans-serif' }}>
+          <h1
+            style={{
+              color: 'white',
+              fontSize: '28px',
+              marginBottom: '8px',
+              fontFamily: 'Outfit, sans-serif'
+            }}
+          >
             Welcome to RP Studio v1.4.1
           </h1>
           <p style={{ opacity: 0.9, fontSize: '14px', maxWidth: '600px', lineHeight: 1.6 }}>
-            Your premium commercial desktop assistant for intelligent printing layout design, batch compression, document conversion, and image toolkits.
+            Your premium commercial desktop assistant for intelligent printing layout design, batch
+            compression, document conversion, and image toolkits.
           </p>
         </div>
         <div
@@ -141,7 +149,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, showToast })
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '16px'
+        }}
+      >
         <Card hoverable className="stat-card" onClick={() => setActiveTab('history')}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div
@@ -158,7 +172,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, showToast })
               <CheckCircle style={{ color: '#f36c45' }} size={24} />
             </div>
             <div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#0c0c0b' }}>{stats.totalProcessed}</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#0c0c0b' }}>
+                {stats.totalProcessed}
+              </div>
               <div style={{ fontSize: '12px', color: '#5f5e5a' }}>Total Files Processed</div>
             </div>
           </div>
@@ -180,7 +196,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, showToast })
               <Layers style={{ color: '#8b5cf6' }} size={24} />
             </div>
             <div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#0c0c0b' }}>{stats.presetsCount}</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#0c0c0b' }}>
+                {stats.presetsCount}
+              </div>
               <div style={{ fontSize: '12px', color: '#5f5e5a' }}>Custom Grid Presets</div>
             </div>
           </div>
@@ -213,7 +231,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, showToast })
                   maxWidth: '180px'
                 }}
               >
-                {stats.saveFolder.split(window.navigator.platform.includes('Win') ? '\\' : '/').pop() || 'Folder'}
+                {stats.saveFolder
+                  .split(window.navigator.platform.includes('Win') ? '\\' : '/')
+                  .pop() || 'Folder'}
               </div>
               <div style={{ fontSize: '12px', color: '#5f5e5a' }}>Default Output Directory</div>
             </div>
@@ -222,11 +242,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, showToast })
       </div>
 
       {/* Main Grid: Quick links + Recent items */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', alignItems: 'start' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr',
+          gap: '24px',
+          alignItems: 'start'
+        }}
+      >
         {/* Quick links grid */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <h3 style={{ fontFamily: 'Outfit, sans-serif' }}>Workspace Toolkits</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '16px'
+            }}
+          >
             {quickTools.map((tool) => (
               <Card
                 key={tool.id}
@@ -254,7 +287,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, showToast })
                   {tool.icon}
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '4px' }}>{tool.title}</h4>
+                  <h4 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '4px' }}>
+                    {tool.title}
+                  </h4>
                   <p style={{ fontSize: '12px', color: '#5f5e5a', lineHeight: 1.4 }}>{tool.desc}</p>
                 </div>
               </Card>
@@ -281,7 +316,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, showToast })
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       padding: '12px 20px',
-                      borderBottom: idx < history.length - 1 ? '1px solid var(--color-border)' : 'none',
+                      borderBottom:
+                        idx < history.length - 1 ? '1px solid var(--color-border)' : 'none',
                       fontSize: '12px'
                     }}
                   >
@@ -297,7 +333,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, showToast })
                       >
                         {item.fileName}
                       </div>
-                      <div style={{ color: 'var(--color-text-light)', fontSize: '11px', marginTop: '2px' }}>
+                      <div
+                        style={{
+                          color: 'var(--color-text-light)',
+                          fontSize: '11px',
+                          marginTop: '2px'
+                        }}
+                      >
                         {item.operation} • {new Date(item.timestamp).toLocaleDateString()}
                       </div>
                     </div>

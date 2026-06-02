@@ -66,7 +66,7 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
       await window.api.setSetting('inkSavingMode', inkSaving)
       await window.api.setSetting('highQualityPrint', highQuality)
       await window.api.setSetting('borderlessPrint', borderless)
-      
+
       onThemeChange(theme)
       showToast('Settings saved successfully', 'success')
     } catch (e: any) {
@@ -102,7 +102,7 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
       const fileData = JSON.stringify(configs, null, 2)
       const defaultFolder = await window.api.getSetting('defaultSaveFolder')
       const outPath = `${defaultFolder}/rp_studio_backup_${Date.now()}.json`
-      
+
       const saveRes = await window.api.saveFile(outPath, fileData)
       if (saveRes.success) {
         showToast(`Configuration backup saved to ${outPath}`, 'success')
@@ -119,7 +119,14 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
       {/* Column 1: Save Paths and Preferences */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'Outfit, sans-serif' }}>
+          <h3
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontFamily: 'Outfit, sans-serif'
+            }}
+          >
             <FolderOpen size={18} />
             Output Configuration
           </h3>
@@ -145,13 +152,29 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
         </Card>
 
         <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'Outfit, sans-serif' }}>
+          <h3
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontFamily: 'Outfit, sans-serif'
+            }}
+          >
             <SettingsIcon size={18} />
             Printing Defaults
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', justifySelf: 'start', gap: '10px', fontSize: '13px', cursor: 'pointer' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifySelf: 'start',
+                gap: '10px',
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            >
               <input
                 type="checkbox"
                 checked={inkSaving}
@@ -160,7 +183,16 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
               Enable Ink Saving Mode (reduces print density)
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', justifySelf: 'start', gap: '10px', fontSize: '13px', cursor: 'pointer' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifySelf: 'start',
+                gap: '10px',
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            >
               <input
                 type="checkbox"
                 checked={highQuality}
@@ -169,7 +201,16 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
               Default High Quality Print Mode
             </label>
 
-            <label style={{ display: 'flex', alignItems: 'center', justifySelf: 'start', gap: '10px', fontSize: '13px', cursor: 'pointer' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifySelf: 'start',
+                gap: '10px',
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            >
               <input
                 type="checkbox"
                 checked={borderless}
@@ -184,7 +225,14 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
       {/* Column 2: System Settings, Backup, Utilities */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'Outfit, sans-serif' }}>
+          <h3
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontFamily: 'Outfit, sans-serif'
+            }}
+          >
             <RefreshCw size={18} />
             System Preferences
           </h3>
@@ -202,7 +250,15 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', cursor: 'pointer' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '13px',
+                cursor: 'pointer'
+              }}
+            >
               <input
                 type="checkbox"
                 checked={autoUpdate}
@@ -214,17 +270,32 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
         </Card>
 
         <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'Outfit, sans-serif' }}>
+          <h3
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontFamily: 'Outfit, sans-serif'
+            }}
+          >
             <Trash2 size={18} />
             Utilities & Backup
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <button className="btn btn-secondary" style={{ display: 'flex', gap: '8px' }} onClick={exportBackup}>
+            <button
+              className="btn btn-secondary"
+              style={{ display: 'flex', gap: '8px' }}
+              onClick={exportBackup}
+            >
               <Download size={14} />
               Export System Settings Backup
             </button>
-            <button className="btn btn-secondary btn-danger" style={{ display: 'flex', gap: '8px' }} onClick={clearHistory}>
+            <button
+              className="btn btn-secondary btn-danger"
+              style={{ display: 'flex', gap: '8px' }}
+              onClick={clearHistory}
+            >
               <Trash2 size={14} />
               Clear Operations History Logs
             </button>
@@ -233,7 +304,14 @@ export const Settings: React.FC<SettingsProps> = ({ showToast, onThemeChange }) 
       </div>
 
       {/* Global save button */}
-      <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+      <div
+        style={{
+          gridColumn: 'span 2',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginTop: '10px'
+        }}
+      >
         <button className="btn btn-primary" onClick={saveAllSettings}>
           <Save size={16} />
           Save Settings & Preferences

@@ -1,23 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Card } from '../components/Card'
-import {
-  Upload,
-  Crop,
-  RotateCw,
-  Trash2,
-  Download,
-  Scissors
-} from 'lucide-react'
+import { Upload, Crop, RotateCw, Trash2, Download, Scissors } from 'lucide-react'
 
 interface ImageToolsProps {
   showToast: (msg: string, type: 'success' | 'error' | 'warning' | 'info') => void
 }
 
 export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
-  const [fileInfo, setFileInfo] = useState<{ name: string; size: number; path: string } | null>(null)
+  const [fileInfo, setFileInfo] = useState<{ name: string; size: number; path: string } | null>(
+    null
+  )
   const [imageSrc, setImageSrc] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'transform' | 'background' | 'watermark' | 'export'>('transform')
-  
+  const [activeTab, setActiveTab] = useState<'transform' | 'background' | 'watermark' | 'export'>(
+    'transform'
+  )
+
   // Transform State
   const [resizeWidth, setResizeWidth] = useState<number>(0)
   const [resizeHeight, setResizeHeight] = useState<number>(0)
@@ -28,29 +25,35 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
 
   // Crop State
   const [isCropping, setIsCropping] = useState<boolean>(false)
-  const [cropBox, setCropBox] = useState<{ x: number; y: number; w: number; h: number } | null>(null)
+  const [cropBox, setCropBox] = useState<{ x: number; y: number; w: number; h: number } | null>(
+    null
+  )
   const isDraggingCrop = useRef<boolean>(false)
   const dragStartPos = useRef<{ x: number; y: number } | null>(null)
   const dragHandle = useRef<string | null>(null) // 'box' or 'tl', 'tr', 'bl', 'br'
-  
+
   // Background Removal State
   const [bgColorKey, setBgColorKey] = useState<{ r: number; g: number; b: number } | null>(null)
   const [tolerance, setTolerance] = useState<number>(30)
   const [isSamplingBg, setIsSamplingBg] = useState<boolean>(false)
-  
+
   // Watermark State
   const [watermarkText, setWatermarkText] = useState<string>('')
   const [watermarkColor, setWatermarkColor] = useState<string>('#ffffff')
   const [watermarkSize, setWatermarkSize] = useState<number>(32)
   const [watermarkOpacity, setWatermarkOpacity] = useState<number>(50)
-  const [watermarkPos, setWatermarkPos] = useState<'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('bottom-right')
-  
+  const [watermarkPos, setWatermarkPos] = useState<
+    'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  >('bottom-right')
+
   // Export State
   const [exportFormat, setExportFormat] = useState<'png' | 'jpeg' | 'webp'>('png')
-  const [targetSizePreset, setTargetSizePreset] = useState<'none' | '50' | '100' | '200' | '500' | '1000' | 'custom'>('none')
+  const [targetSizePreset, setTargetSizePreset] = useState<
+    'none' | '50' | '100' | '200' | '500' | '1000' | 'custom'
+  >('none')
   const [customTargetSize, setCustomTargetSize] = useState<string>('') // in KB
   const [stripMetadata, setStripMetadata] = useState<boolean>(true)
-  
+
   // Refs
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const originalImage = useRef<HTMLImageElement | null>(null)
@@ -163,7 +166,10 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
     }
   }
 
-  const removeBackgroundKeyColor = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void => {
+  const removeBackgroundKeyColor = (
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D
+  ): void => {
     if (!bgColorKey) return
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const data = imgData.data
@@ -173,7 +179,7 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
       const r = data[i]
       const g = data[i + 1]
       const b = data[i + 2]
-      
+
       const dist = Math.sqrt((r - tr) ** 2 + (g - tg) ** 2 + (b - tb) ** 2)
       if (dist < tolerance) {
         data[i + 3] = 0 // Transparent
@@ -247,10 +253,10 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
     // Draw handles
     ctx.fillStyle = '#ffffff'
     const hs = 8 // Handle size
-    ctx.fillRect(x - hs/2, y - hs/2, hs, hs) // TL
-    ctx.fillRect(x + w - hs/2, y - hs/2, hs, hs) // TR
-    ctx.fillRect(x - hs/2, y + h - hs/2, hs, hs) // BL
-    ctx.fillRect(x + w - hs/2, y + h - hs/2, hs, hs) // BR
+    ctx.fillRect(x - hs / 2, y - hs / 2, hs, hs) // TL
+    ctx.fillRect(x + w - hs / 2, y - hs / 2, hs, hs) // TR
+    ctx.fillRect(x - hs / 2, y + h - hs / 2, hs, hs) // BL
+    ctx.fillRect(x + w - hs / 2, y + h - hs / 2, hs, hs) // BR
   }
 
   useEffect(() => {
@@ -327,7 +333,8 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
 
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>): void => {
     const canvas = canvasRef.current
-    if (!canvas || !isCropping || !cropBox || !isDraggingCrop.current || !dragStartPos.current) return
+    if (!canvas || !isCropping || !cropBox || !isDraggingCrop.current || !dragStartPos.current)
+      return
 
     const rect = canvas.getBoundingClientRect()
     const scaleX = canvas.width / rect.width
@@ -421,7 +428,10 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
     setRotation((prev) => (prev + 90) % 360)
   }
 
-  const executeTargetCompression = async (canvas: HTMLCanvasElement, targetKB: number): Promise<string> => {
+  const executeTargetCompression = async (
+    canvas: HTMLCanvasElement,
+    targetKB: number
+  ): Promise<string> => {
     let quality = 0.95
     let dataUrl = canvas.toDataURL(`image/${exportFormat}`, quality)
     let size = Math.round((dataUrl.length * 3) / 4) / 1024 // base64 estimate
@@ -457,11 +467,7 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
     if (!canvas || !fileInfo) return
 
     try {
-      const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-      if (!defaultFolder) {
-        showToast('Default folder not set. Please set in Settings tab.', 'error')
-        return
-      }
+      const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
 
       let exportDataUrl = canvas.toDataURL(`image/${exportFormat}`, 0.9)
 
@@ -482,7 +488,9 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
 
       // Generate filename
       const baseName = fileInfo.name.substring(0, fileInfo.name.lastIndexOf('.'))
-      const suggestedPath = `${defaultFolder}/${baseName}_edit.${exportFormat}`
+      const suggestedPath = defaultFolder
+        ? `${defaultFolder}/${baseName}_edit.${exportFormat}`
+        : `${baseName}_edit.${exportFormat}`
 
       const outPath = await window.api.selectSavePath({
         title: 'Export & Save Image As',
@@ -499,7 +507,7 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
       if (result.success) {
         const finalName = outPath.split(/[\\/]/).pop() || `${baseName}_edit.${exportFormat}`
         showToast(`Saved successfully to ${finalName}`, 'success')
-        
+
         // Add to history
         const bytes = Math.round((exportDataUrl.length * 3) / 4)
         await window.api.addHistory({
@@ -526,7 +534,9 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: 'calc(100% - 20px)' }}>
+    <div
+      style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: 'calc(100% - 20px)' }}
+    >
       {!imageSrc ? (
         <Card
           className="dropzone"
@@ -552,7 +562,15 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
           </button>
         </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px', height: '100%', alignItems: 'stretch' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 320px',
+            gap: '20px',
+            height: '100%',
+            alignItems: 'stretch'
+          }}
+        >
           {/* Main workspace canvas */}
           <div
             ref={containerRef}
@@ -627,7 +645,8 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
                 maxHeight: '90%',
                 boxShadow: 'var(--shadow-lg)',
                 backgroundColor: 'white',
-                backgroundImage: 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)',
+                backgroundImage:
+                  'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)',
                 backgroundSize: '20px 20px',
                 backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
                 cursor: isSamplingBg ? 'crosshair' : isCropping ? 'default' : 'grab'
@@ -636,7 +655,9 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
           </div>
 
           {/* Right settings pane */}
-          <Card style={{ display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
+          <Card
+            style={{ display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}
+          >
             <div className="tab-navigation" style={{ marginBottom: '10px' }}>
               <button
                 className={`tab-btn ${activeTab === 'transform' ? 'active' : ''}`}
@@ -679,7 +700,8 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
                         const val = parseInt(e.target.value) || 0
                         setResizeWidth(val)
                         if (maintainAspect && originalImage.current) {
-                          const aspect = originalImage.current.naturalHeight / originalImage.current.naturalWidth
+                          const aspect =
+                            originalImage.current.naturalHeight / originalImage.current.naturalWidth
                           setResizeHeight(Math.round(val * aspect))
                         }
                       }}
@@ -695,7 +717,8 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
                         const val = parseInt(e.target.value) || 0
                         setResizeHeight(val)
                         if (maintainAspect && originalImage.current) {
-                          const aspect = originalImage.current.naturalWidth / originalImage.current.naturalHeight
+                          const aspect =
+                            originalImage.current.naturalWidth / originalImage.current.naturalHeight
                           setResizeWidth(Math.round(val * aspect))
                         }
                       }}
@@ -703,7 +726,15 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
                   </div>
                 </div>
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer' }}>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer'
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={maintainAspect}
@@ -712,7 +743,13 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
                   Lock Aspect Ratio
                 </label>
 
-                <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', margin: '8px 0' }} />
+                <hr
+                  style={{
+                    border: 'none',
+                    borderTop: '1px solid var(--color-border)',
+                    margin: '8px 0'
+                  }}
+                />
 
                 <h4 style={{ fontSize: '13px' }}>Flipping</h4>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -737,8 +774,15 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
             {activeTab === 'background' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <h4 style={{ fontSize: '13px' }}>Chroma Key Background Eraser</h4>
-                <p style={{ fontSize: '11px', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
-                  Select background sampling tool, then click on the color inside preview canvas to make it transparent.
+                <p
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--color-text-secondary)',
+                    lineHeight: 1.4
+                  }}
+                >
+                  Select background sampling tool, then click on the color inside preview canvas to
+                  make it transparent.
                 </p>
 
                 <button
@@ -893,7 +937,15 @@ export const ImageTools: React.FC<ImageToolsProps> = ({ showToast }) => {
                   </div>
                 )}
 
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer' }}>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '12px',
+                    cursor: 'pointer'
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={stripMetadata}

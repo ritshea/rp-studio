@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Card } from '../components/Card'
 import { Modal } from '../components/Modal'
-import {
-  Upload,
-  Printer,
-  Save,
-  Plus
-} from 'lucide-react'
+import { Upload, Printer, Save, Plus } from 'lucide-react'
 
 interface PrintLayoutProps {
   showToast: (msg: string, type: 'success' | 'error' | 'warning' | 'info') => void
@@ -39,7 +34,7 @@ const PAPER_PRESETS: Record<string, { name: string; w: number; h: number }> = {
 
 export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
   const [activePreset, setActivePreset] = useState<string>('a4')
-  
+
   // Grid config
   const [config, setConfig] = useState<GridConfig>({
     name: 'Default A4 Grid',
@@ -61,7 +56,7 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
 
   // Uploaded images inventory
   const [uploadedImages, setUploadedImages] = useState<string[]>([]) // array of base64/dataURLs
-  
+
   // Grid cells contents
   const [cells, setCells] = useState<Record<string, string>>({}) // key: row_col, value: img dataURL
   const [selectedCell, setSelectedCell] = useState<string | null>(null) // row_col being clicked
@@ -316,8 +311,10 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
       })
 
       if (response.success && response.data) {
-        const defaultFolder = await window.api.getSetting('defaultSaveFolder')
-        const suggestedPath = `${defaultFolder}/print_layout_${Date.now()}.pdf`
+        const defaultFolder = (await window.api.getSetting('defaultSaveFolder')) || ''
+        const suggestedPath = defaultFolder
+          ? `${defaultFolder}/print_layout_${Date.now()}.pdf`
+          : `print_layout_${Date.now()}.pdf`
 
         const outPath = await window.api.selectSavePath({
           title: 'Save Print Grid Layout As',
@@ -331,7 +328,7 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
         }
 
         const result = await window.api.saveFile(outPath, response.data)
-        
+
         if (result.success) {
           const finalName = outPath.split(/[\\/]/).pop() || `print_layout_${Date.now()}.pdf`
           showToast(`PDF saved to: ${finalName}`, 'success')
@@ -376,11 +373,26 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
   const cellHeight = calcCellHeight()
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr 340px', gap: '20px', height: 'calc(100% - 20px)' }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '240px 1fr 340px',
+        gap: '20px',
+        height: 'calc(100% - 20px)'
+      }}
+    >
       {/* 1. Left Tray Panel */}
-      <Card style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%', overflowY: 'auto' }}>
+      <Card
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          height: '100%',
+          overflowY: 'auto'
+        }}
+      >
         <h4 style={{ fontFamily: 'Outfit, sans-serif' }}>Photo Tray</h4>
-        
+
         <button
           className="btn btn-secondary"
           onClick={(): void => document.getElementById('tray-picker')?.click()}
@@ -399,12 +411,31 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
         />
 
         {uploadedImages.length === 0 ? (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#9c9a93', textAlign: 'center', padding: '12px' }}>
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#9c9a93',
+              textAlign: 'center',
+              padding: '12px'
+            }}
+          >
             <Upload size={32} style={{ opacity: 0.5, marginBottom: '8px' }} />
             <p style={{ fontSize: '11px', lineHeight: 1.4 }}>Load photos to fill cells.</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', overflowY: 'auto', flex: 1 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '8px',
+              overflowY: 'auto',
+              flex: 1
+            }}
+          >
             {uploadedImages.map((src, idx) => (
               <div
                 key={idx}
@@ -419,7 +450,11 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
                 onClick={(): void => autoFillGrid(src)}
                 title="Click to auto-fill entire grid"
               >
-                <img src={src} alt="Tray item" style={{ width: '100%', height: '70px', objectFit: 'cover', borderRadius: '2px' }} />
+                <img
+                  src={src}
+                  alt="Tray item"
+                  style={{ width: '100%', height: '70px', objectFit: 'cover', borderRadius: '2px' }}
+                />
                 <button
                   onClick={(e): void => {
                     e.stopPropagation()
@@ -501,12 +536,28 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
                   }}
                 >
                   {imgSrc ? (
-                    <img src={imgSrc} alt="Cell" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img
+                      src={imgSrc}
+                      alt="Cell"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
                   ) : (
-                    <span style={{ fontSize: '9px', color: '#a09f98', fontWeight: 600 }}>Empty</span>
+                    <span style={{ fontSize: '9px', color: '#a09f98', fontWeight: 600 }}>
+                      Empty
+                    </span>
                   )}
                   {config.showCutMarks && (
-                    <div style={{ position: 'absolute', width: '4px', height: '4px', border: '0.25px solid #555555', pointerEvents: 'none', top: 0, left: 0 }} />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        width: '4px',
+                        height: '4px',
+                        border: '0.25px solid #555555',
+                        pointerEvents: 'none',
+                        top: 0,
+                        left: 0
+                      }}
+                    />
                   )}
                 </div>
               )
@@ -545,7 +596,9 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
               className="form-control"
               value={config.paperWidth}
               disabled={activePreset !== 'custom'}
-              onChange={(e): void => setConfig({ ...config, paperWidth: parseInt(e.target.value) || 0 })}
+              onChange={(e): void =>
+                setConfig({ ...config, paperWidth: parseInt(e.target.value) || 0 })
+              }
             />
           </div>
           <div className="form-group">
@@ -555,7 +608,9 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
               className="form-control"
               value={config.paperHeight}
               disabled={activePreset !== 'custom'}
-              onChange={(e): void => setConfig({ ...config, paperHeight: parseInt(e.target.value) || 0 })}
+              onChange={(e): void =>
+                setConfig({ ...config, paperHeight: parseInt(e.target.value) || 0 })
+              }
             />
           </div>
         </div>
@@ -568,7 +623,9 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
               type="number"
               className="form-control"
               value={config.topMargin}
-              onChange={(e): void => setConfig({ ...config, topMargin: parseInt(e.target.value) || 0 })}
+              onChange={(e): void =>
+                setConfig({ ...config, topMargin: parseInt(e.target.value) || 0 })
+              }
             />
           </div>
           <div className="form-group">
@@ -577,7 +634,9 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
               type="number"
               className="form-control"
               value={config.leftMargin}
-              onChange={(e): void => setConfig({ ...config, leftMargin: parseInt(e.target.value) || 0 })}
+              onChange={(e): void =>
+                setConfig({ ...config, leftMargin: parseInt(e.target.value) || 0 })
+              }
             />
           </div>
         </div>
@@ -603,7 +662,9 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
               min="1"
               max="20"
               value={config.columns}
-              onChange={(e): void => setConfig({ ...config, columns: parseInt(e.target.value) || 1 })}
+              onChange={(e): void =>
+                setConfig({ ...config, columns: parseInt(e.target.value) || 1 })
+              }
             />
           </div>
         </div>
@@ -616,7 +677,9 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
               type="number"
               className="form-control"
               value={config.rowGap}
-              onChange={(e): void => setConfig({ ...config, rowGap: parseInt(e.target.value) || 0 })}
+              onChange={(e): void =>
+                setConfig({ ...config, rowGap: parseInt(e.target.value) || 0 })
+              }
             />
           </div>
           <div className="form-group">
@@ -625,7 +688,9 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
               type="number"
               className="form-control"
               value={config.colGap}
-              onChange={(e): void => setConfig({ ...config, colGap: parseInt(e.target.value) || 0 })}
+              onChange={(e): void =>
+                setConfig({ ...config, colGap: parseInt(e.target.value) || 0 })
+              }
             />
           </div>
         </div>
@@ -649,7 +714,15 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
 
         {/* Guides Checkboxes */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '12px',
+              cursor: 'pointer'
+            }}
+          >
             <input
               type="checkbox"
               checked={config.showGrid}
@@ -657,7 +730,15 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
             />
             Show Grid Lines
           </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '12px',
+              cursor: 'pointer'
+            }}
+          >
             <input
               type="checkbox"
               checked={config.showCutMarks}
@@ -691,8 +772,20 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
         {/* DB presets list */}
         {dbPresets.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
-            <label style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>Saved Presets:</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '120px', overflowY: 'auto' }}>
+            <label
+              style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontWeight: 600 }}
+            >
+              Saved Presets:
+            </label>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                maxHeight: '120px',
+                overflowY: 'auto'
+              }}
+            >
               {dbPresets.map((preset) => (
                 <div
                   key={preset.id}
@@ -714,7 +807,12 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
                   </span>
                   <button
                     onClick={(): Promise<void> => deleteDatabasePreset(preset.id)}
-                    style={{ border: 'none', background: 'transparent', color: 'var(--color-error)', cursor: 'pointer' }}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      color: 'var(--color-error)',
+                      cursor: 'pointer'
+                    }}
                   >
                     X
                   </button>
@@ -725,7 +823,7 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
         )}
 
         <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)' }} />
-        
+
         {/* Output PDF/Print Actions */}
         <div style={{ display: 'flex', gap: '8px' }}>
           <button className="btn btn-secondary" style={{ flex: 1 }} onClick={savePdf}>
@@ -757,7 +855,8 @@ export const PrintLayout: React.FC<PrintLayoutProps> = ({ showToast }) => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <p style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-              Click any photo to assign it to cell: <span style={{ fontWeight: 600, color: 'var(--color-dark)' }}>{selectedCell}</span>
+              Click any photo to assign it to cell:{' '}
+              <span style={{ fontWeight: 600, color: 'var(--color-dark)' }}>{selectedCell}</span>
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
               {uploadedImages.map((src, idx) => (
